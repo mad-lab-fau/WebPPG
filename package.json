@@ -1,0 +1,11 @@
+{
+  "name": "webppg",
+  "version": "0.0.1",
+  "description": "Record photoplethysmogram (PPG) signals from the browse by smartphone camera and torch/flash light. Utilizes WebRTC.",
+  "main": "WebPPG.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Nissen",
+  "license": "MIT"
+}
