@@ -79,7 +79,7 @@ class WebPPG {
   /**
    * Start processing of the WebRTC video stream.
    * Will prompt the user to allow camera usage.
-   * Requires a <video autplay />-DOM element to function.
+   * Requires a <video autplay />-DOM element to work.
    * Note that the width and height of this <video />-element MUST be set, as it is
    * used as the raw input resolution and also in the WebRTC getUserMedia request.
    * 
@@ -116,7 +116,10 @@ class WebPPG {
       this.globalTrack.applyConstraints({
           advanced: [{torch: true}]
       });
-    }).catch(err => console.error(err));
+    }).catch(err => {
+      console.error(err);
+      throw err;
+    });
   }
 
   /**
