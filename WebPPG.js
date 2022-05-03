@@ -79,7 +79,7 @@ class WebPPG {
   /**
    * Start processing of the WebRTC video stream.
    * Will prompt the user to allow camera usage.
-   * Requires a <video autplay />-DOM element to work.
+   * Requires a <video autplay />-DOM element to function.
    * Note that the width and height of this <video />-element MUST be set, as it is
    * used as the raw input resolution and also in the WebRTC getUserMedia request.
    * 
@@ -87,10 +87,10 @@ class WebPPG {
    * @returns 
    */
 
-  startWebRTC(videoElement) {
+  async startWebRTC(videoElement) {
     this.video = videoElement; 
 
-    return navigator.mediaDevices.getUserMedia({
+    let stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'environment',
         frameRate: {
@@ -104,22 +104,19 @@ class WebPPG {
         },
         torch: true,
       }
-    }).then((stream) => {
-      videoElement.srcObject = stream;
+    })
+
+    videoElement.srcObject = stream;
   
-      //console.log(navigator.mediaDevices.getSupportedConstraints());
+    //console.log(navigator.mediaDevices.getSupportedConstraints());
   
-      this.globalTrack = stream.getVideoTracks()[0];
+    this.globalTrack = stream.getVideoTracks()[0];
       
-      // console.log(this.globalTrack.getSettings());
+    // console.log(this.globalTrack.getSettings());
       
-      this.globalTrack.applyConstraints({
-          advanced: [{torch: true}]
-      });
-    }).catch(err => {
-      console.error(err);
-      throw err;
-    });
+    await this.globalTrack.applyConstraints({
+        advanced: [{torch: true}]
+    })
   }
 
   /**
