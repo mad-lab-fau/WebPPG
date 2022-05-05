@@ -203,6 +203,14 @@ class WebPPG {
   }
 
   /**
+   * Get currently stored data
+   * @returns object Currently stored data
+   */
+  getData(){
+    return {red: this.rAvgs, green: this.gAvgs, blue: this.bAvgs}
+  }
+
+  /**
    * Time handler/agent
    * Executed in window.-context, thus requires "this/self" of WebPPG 
    * provided by parameter
