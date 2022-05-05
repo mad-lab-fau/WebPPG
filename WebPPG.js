@@ -3,7 +3,7 @@ import { getCenterAreaStartCoordinate, averageArray } from './helpers';
 class WebPPG {
   constructor () {
 
-    console.log("web ppg constructed");
+    console.log("WebPPG constructed");
 
     /**
      *    var video = document.getElementById('original-video');
@@ -18,6 +18,7 @@ class WebPPG {
     // 
     this.helperCanvas;
     this.aoiCanvas;
+    this.internalInterval;
 
     this.timestamps = [];
     this.rAvgs = [];
@@ -130,7 +131,7 @@ class WebPPG {
    * WebRTC must be up and running beforehand
     */
        
-  startPreprocessing(helperCanvas, aoiCanvas) {
+  startRecording(helperCanvas, aoiCanvas) {
     this.helperCanvas = helperCanvas;
     this.aoiCanvas = aoiCanvas;
 
@@ -138,7 +139,17 @@ class WebPPG {
     // setTimeout(this.timerCallback(this), 100);
     // setInterval(this.timerCallback, 30);
     // }, (1000/this.getFps()));
-    setInterval(this.computeFrame, 1000/this.getFps(), this);
+    this.internalInterval = setInterval(this.computeFrame, 1000/this.getFps(), this);
+  }
+
+  /**
+   * Stops the recording
+   */
+  stopRecording() {
+    if(this.internalInterval === undefined) {
+      throw new Error("Recording was not started.")
+    }
+    clearInterval(this.internalInterval);
   }
 
   /**
@@ -156,6 +167,11 @@ class WebPPG {
     this.bAvgs.push(blueAverage);
   }
 
+  /**
+   * Internal processing loop
+   * Called every frame
+   * @param {} self 
+   */
   computeFrame(self) {
     let helperCanvasContext = self.helperCanvas.getContext("2d");
     let aoiCanvasContext = self.aoiCanvas.getContext("2d");
@@ -182,6 +198,8 @@ class WebPPG {
     }
 
     self.addPPGDataRecord(averageArray(redArray), averageArray(greenArray), averageArray(blueArray));
+
+    console.log("test");
   }
 
   /**
