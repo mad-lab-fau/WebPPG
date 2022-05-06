@@ -115,9 +115,7 @@ class WebPPG {
       
     // console.log(this.globalTrack.getSettings());
       
-    await this.globalTrack.applyConstraints({
-        advanced: [{torch: true}]
-    })
+    this.torchOn();
   }
 
   /**
@@ -150,6 +148,7 @@ class WebPPG {
       throw new Error("Recording was not started.")
     }
     clearInterval(this.internalInterval);
+    this.torchOff();
   }
 
   /**
