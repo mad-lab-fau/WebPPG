@@ -35,14 +35,14 @@ class WebPPG {
   /**
    * Torch on/off mainly for development purposes
    */
-  torchOff() {
-    this.globalTrack.applyConstraints({
+  async torchOff() {
+    await this.globalTrack.applyConstraints({
         advanced: [{torch: false}]
     });
   }
 
-  torchOn() {
-    this.globalTrack.applyConstraints({
+  async torchOn() {
+    await this.globalTrack.applyConstraints({
         advanced: [{torch: true}]
     });
   }
@@ -114,8 +114,8 @@ class WebPPG {
     this.globalTrack = stream.getVideoTracks()[0];
       
     // console.log(this.globalTrack.getSettings());
-      
-    this.torchOn();
+
+    await this.torchOn();
   }
 
   /**
