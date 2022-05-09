@@ -1,4 +1,4 @@
-import { getCenterAreaStartCoordinate, averageArray } from './helpers';
+import { getCenterAreaStartCoordinate, averageArray, inverseArray } from './helpers';
 
 class WebPPG {
   constructor () {
@@ -196,9 +196,7 @@ class WebPPG {
         blueArray.push(frame.data[i * 4 + 2]);
     }
 
-    self.addPPGDataRecord(averageArray(redArray), averageArray(greenArray), averageArray(blueArray));
-
-    console.log("test");
+    self.addPPGDataRecord(averageArray(inverseArray(redArray, 255)), averageArray(inverseArray(greenArray, 255)), averageArray(inverseArray(blueArray, 255)));
   }
 
   /**
