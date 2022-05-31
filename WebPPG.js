@@ -1,21 +1,14 @@
 import { getCenterAreaStartCoordinate, averageArray, inverseArray } from './helpers';
 
 class WebPPG {
-  constructor () {
+  constructor() {
 
-    console.log("WebPPG constructed");
-
-    /**
-     *    var video = document.getElementById('original-video');
-          var sourceCanvas = document.getElementById('source-canvas');
-          var aoiCanvas = document.getElementById('aoi-canvas');
-     */
+    console.log("WebPPG constructed.");
 
     // Image capturing variables
     this.globalTrack;
     this.video;
 
-    // 
     this.helperCanvas;
     this.aoiCanvas;
     this.internalInterval;
@@ -33,17 +26,20 @@ class WebPPG {
    */
 
   /**
-   * Torch on/off mainly for development purposes
+   * Torch the torch off
    */
   async torchOff() {
     await this.globalTrack.applyConstraints({
-        advanced: [{torch: false}]
+      advanced: [{ torch: false }]
     });
   }
 
+  /**
+   * Turn the torch on
+   */
   async torchOn() {
     await this.globalTrack.applyConstraints({
-        advanced: [{torch: true}]
+      advanced: [{ torch: true }]
     });
   }
 
@@ -52,13 +48,17 @@ class WebPPG {
    * @returns FPS or false if not supported
    */
   getFps() {
-      let capabilities = this.globalTrack.getCapabilities();
-      if ( capabilities ) {
-          return capabilities.frameRate.max;
-      }
-      return false;
+    let capabilities = this.globalTrack.getCapabilities();
+    if (capabilities) {
+      return capabilities.frameRate.max;
+    }
+    return false;
   }
 
+  /**
+   * 
+   * @returns The DOM video element
+   */
   getVideoElement() {
     if (this.video) {
       return this.video;
@@ -67,7 +67,11 @@ class WebPPG {
       return false;
     }
   }
-  
+
+  /**
+   * 
+   * @returns The AOI canvas DOM element
+   */
   getAoiCanvasElement() {
     if (this.aoiCanvas) {
       return this.aoiCanvas;
@@ -84,36 +88,30 @@ class WebPPG {
    * Note that the width and height of this <video />-element MUST be set, as it is
    * used as the raw input resolution and also in the WebRTC getUserMedia request.
    * 
-   * @param {} videoElement DOM <video> element, e.g. previously acquired via document.selectElementById()
-   * @returns 
+   * @param {DOM <video> element} videoElement e.g. previously acquired via document.selectElementById()
    */
-
   async startWebRTC(videoElement) {
-    this.video = videoElement; 
+    this.video = videoElement;
 
     let stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'environment',
         frameRate: {
-            ideal: 240
+          ideal: 240
         },
         height: {
-            ideal: this.video.height
+          ideal: this.video.height
         },
         width: {
-            ideal: this.video.width
+          ideal: this.video.width
         },
         torch: true,
       }
     })
 
     videoElement.srcObject = stream;
-  
-    //console.log(navigator.mediaDevices.getSupportedConstraints());
-  
+
     this.globalTrack = stream.getVideoTracks()[0];
-      
-    // console.log(this.globalTrack.getSettings());
 
     await this.torchOn();
   }
@@ -125,26 +123,23 @@ class WebPPG {
 
   /**
    * Begin processing loop
-   * For internal preprocesisng
+   * For internal preprocessing
    * WebRTC must be up and running beforehand
-    */
-       
+   * @param {DOMElement} helperCanvas 
+   * @param {DOMElement} aoiCanvas 
+   */
   startRecording(helperCanvas, aoiCanvas) {
     this.helperCanvas = helperCanvas;
     this.aoiCanvas = aoiCanvas;
 
-    // start the first processing loop
-    // setTimeout(this.timerCallback(this), 100);
-    // setInterval(this.timerCallback, 30);
-    // }, (1000/this.getFps()));
-    this.internalInterval = setInterval(this.computeFrame, 1000/this.getFps(), this);
+    this.internalInterval = setInterval(this.computeFrame, 1000 / this.getFps(), this);
   }
 
   /**
    * Stops the recording
    */
   stopRecording() {
-    if(this.internalInterval === undefined) {
+    if (this.internalInterval === undefined) {
       throw new Error("Recording was not started.")
     }
     clearInterval(this.internalInterval);
@@ -154,11 +149,10 @@ class WebPPG {
   /**
    * Save recorded values with current timestamp
    * 
-   * @param {*} redAverage Recorded value of the red channel
-   * @param {*} greenAverage Recorded value of the green channel
-   * @param {*} blueAverage Recorded value of the blue channel
+   * @param {Number} redAverage Recorded average value of the red channel
+   * @param {Number} greenAverage Recorded average value of the green channel
+   * @param {Number} blueAverage Recorded average value of the blue channel
    */
-
   addPPGDataRecord(redAverage, greenAverage, blueAverage) {
     this.timestamps.push(Date.now());
     this.rAvgs.push(redAverage);
@@ -184,46 +178,30 @@ class WebPPG {
     let frame = helperCanvasContext.getImageData(xStartCoordinate, yStartCoordiante, self.aoiCanvas.width, self.aoiCanvas.height); // Select AOI here
 
     aoiCanvasContext.putImageData(frame, 0, 0);
-    
-    // console.log(frame);
+
     let redArray = [];
     let greenArray = [];
     let blueArray = [];
 
-    for (let i = 0; i < frame.data.length/4; i++) {
-        redArray.push(frame.data[i * 4 + 0]);
-        greenArray.push(frame.data[i * 4 + 1]);
-        blueArray.push(frame.data[i * 4 + 2]);
+    for (let i = 0; i < frame.data.length / 4; i++) {
+      redArray.push(frame.data[i * 4 + 0]);
+      greenArray.push(frame.data[i * 4 + 1]);
+      blueArray.push(frame.data[i * 4 + 2]);
     }
 
-    self.addPPGDataRecord(averageArray(inverseArray(redArray, 255)), averageArray(inverseArray(greenArray, 255)), averageArray(inverseArray(blueArray, 255)));
+    // Note: Using the "inverseArray" function before storing values can help to increase (float) precision.
+    // This way, values are "around 0" instead of "around 255", where precision is higher.
+    // This however depends on the specific channel and smartphone model, and requires further investigation.
+    self.addPPGDataRecord(averageArray(redArray, 255), averageArray(greenArray, 255), averageArray(blueArray, 255));
   }
 
   /**
    * Get currently stored data
-   * @returns object Currently stored data
+   * @returns object Currently stored (recorded) PPG data
    */
-  getData(){
-    return {red: this.rAvgs, green: this.gAvgs, blue: this.bAvgs}
+  getData() {
+    return { times: this.timestamps, red: this.rAvgs, green: this.gAvgs, blue: this.bAvgs }
   }
-
-  /**
-   * Time handler/agent
-   * Executed in window.-context, thus requires "this/self" of WebPPG 
-   * provided by parameter
-   * EDIT: Probably no longer needed. This may however increase signal steadyness on the long run.
-   * 
-   * @param {} self "this" of the actual class
-   */
-  /*timerCallback(self) {
-    // let begin = Date.now();
-    self.computeFrame();
-    console.log(self.getFps());
-    // let delay = 1000/this.getFps() - (Date.now() - begin);
-    // setTimeout(self.timerCallback(self), delay);
-
-    // setTimeout(self.timerCallback(self), 1000/this.getFps());
-   }*/
 }
 
 export default WebPPG;

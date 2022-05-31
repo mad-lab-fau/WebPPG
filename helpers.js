@@ -1,6 +1,6 @@
 /**
  * Get the "start" coordinates of an area of interest (AOI)
- * The AOI will be positioned in the middle of the image
+ * The AOI will be positioned in the middle/center of the image
  * 
  * @param {*} fullSize Full width/height of the image in pixels (e.g. 100)
  * @param {*} windowSize Size of the window to be extracted (e.g. 10)
@@ -13,7 +13,6 @@ export function getCenterAreaStartCoordinate(fullSize, windowSize) {
 /**
  * Average all values of an array
  */
-
  export const averageArray = arr => arr.reduce((a,b) => a + b, 0) / arr.length
 
 /**
