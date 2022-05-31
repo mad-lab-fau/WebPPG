@@ -1,6 +1,6 @@
 {
   "name": "webppg",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Record photoplethysmogram (PPG) signals from the browse by smartphone camera and torch/flash light. Utilizes WebRTC.",
   "main": "WebPPG.js",
   "scripts": {
